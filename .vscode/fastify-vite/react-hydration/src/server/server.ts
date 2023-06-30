@@ -206,6 +206,14 @@ function authReqHandler(req: FastifyRequest, res: FastifyReply): void {}
 
 const kSetup = Symbol("kSetup");
 const kOptions = Symbol("kOptions");
+
+function serialize(frag: any) {
+  if (typeof frag === "object") {
+    return `$\{${frag.param}}`;
+  } else {
+    return frag;
+  }
+}
 class Renderer {
   instance: FastifyInstance<
     RawServerDefault,
@@ -254,6 +262,60 @@ class Renderer {
         scope.errorHandler(error, req, reply);
       };
     },
+
+    createHtmlTemplateFunction(source: string) {
+      const ranges = new Map();
+      const interpolated: any = [""];
+      const params = [];
+
+      for (const match of source.matchAll(/<!--\s*([\w]+)\s*-->/g)) {
+        ranges.set(match.index, {
+          param: match[1],
+          end: match.index! + match[0].length,
+        });
+      }
+
+      let cursor = 0;
+      const cut = null;
+      let range = null;
+
+      for (let i = 0; i < source.length; i++) {
+        if (i === cut) {
+          interpolated.push("");
+          cursor += 1;
+        } else if (ranges.get(i)) {
+          range = ranges.get(i);
+          params.push(range.param);
+          interpolated.push({ param: range.param });
+          i = range.end;
+          interpolated.push("");
+          cursor += 2;
+        }
+        interpolated[cursor] += source[i];
+      }
+
+      // eslint-disable-next-line no-eval
+      return (0, eval)(
+        `(function ({ ${params.join(", ")} }) {` +
+          `return \`${interpolated.map((s: any) => serialize(s)).join("")}\`` +
+          "})"
+      );
+    },
+
+    // Create reply.html() response function
+    createHtmlFunction(source: string, scope: any, config: any) {
+      const indexHtmlTemplate = config.createHtmlTemplateFunction(source);
+      if (config.spa) {
+        return function () {
+          scope.type("text/html");
+          scope.send(indexHtmlTemplate({ element: "" }));
+        };
+      }
+      return function (ctx: any) {
+        scope.type("text/html");
+        scope.send(indexHtmlTemplate(ctx));
+      };
+    },
   };
 
   config: FastifyPluginOptions;
@@ -292,6 +354,7 @@ class Renderer {
     );
 
     // Register individual Fastify routes for each the client-provided routes
+    // console.log(typeof routes[Symbol.iterator]);
     if (routes && typeof routes[Symbol.iterator] === "function") {
       for (const route of routes) {
         this.config.createRoute(
@@ -426,11 +489,12 @@ class Renderer {
         return;
       }
       bundle.indexHtml = fs.readFileSync(indexHtmlPath, "utf8");
-      const manifestFilePath = path.resolve(
-        bundle.dir,
-        "client/ssr-manifest.json"
-      );
-      bundle.manifest = await import(manifestFilePath);
+      // const manifestFilePath = path.resolve(
+      //   bundle.dir,
+      //   "client/ssr-manifest.json"
+      // );
+      // bundle.manifest = await import(manifestFilePath);
+      bundle.manifest = [];
     } else {
       //dev
       bundle.manifest = [];
@@ -558,7 +622,15 @@ class Renderer {
       throw new Error("No distribution bundle found.");
     }
     // For production you get the distribution version of the render function
+    config.vite = {};
+    config.vite.root = path.join(__dirname, "..", "..");
+    config.clientModule = "index.js";
+    config.vite.build = {
+      assetsDir: "assets",
+    };
     const { assetsDir } = config.vite.build;
+
+    config.bundle.dir = path.join(config.vite.root, "dist");
 
     const clientDist = config.spa
       ? path.resolve(config.bundle.dir)
@@ -568,13 +640,13 @@ class Renderer {
       throw new Error("No client distribution bundle found.");
     }
 
-    const serverDist = path.resolve(config.bundle.dir, "server");
-    if (!config.spa && !fs.existsSync(serverDist)) {
-      throw new Error("No server distribution bundle found.");
-    }
+    // const serverDist = path.resolve(config.bundle.dir, "server");
+    // if (!config.spa && !fs.existsSync(serverDist)) {
+    //   throw new Error("No server distribution bundle found.");
+    // }
     // We also register fastify-static to serve all static files
     // in production (dev server takes of this)
-    await this.instance.register(async function staticContext(scope) {
+    await this.instance.register(async function (scope) {
       await scope.register(FastifyStatic, {
         root: path.resolve(clientDist, assetsDir),
         prefix: `/${assetsDir}`,
@@ -603,6 +675,7 @@ class Renderer {
     // Set reply.html() function with production version of index.html
     this.instance.decorateReply(
       "html",
+
       await config.createHtmlFunction(
         config.bundle.indexHtml,
         this.instance,
@@ -623,18 +696,16 @@ class Renderer {
       if (config.spa) {
         return {};
       }
-      const serverFiles = [
-        path.join("server", `${path.parse(config.clientModule).name}.js`),
-        path.join("server", `${path.parse(config.clientModule).name}.mjs`),
-      ];
-      let serverBundlePath = "";
-      for (const serverFile of serverFiles) {
-        // Use file path on Windows
-        serverBundlePath = path.resolve(config.bundle.dir, serverFile);
-        if (fs.existsSync(serverBundlePath)) {
-          break;
-        }
+      const serverBundlePath = path.resolve(
+        config.bundle.dir,
+        "client",
+        config.clientModule
+      );
+
+      if (!fs.existsSync(serverBundlePath)) {
+        throw new Error("no file");
       }
+
       const serverBundle = await import(serverBundlePath);
       return serverBundle.default || serverBundle;
     }

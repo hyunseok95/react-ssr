@@ -1,9 +1,20 @@
-import React, { useRef } from "react";
+import React, { ReactNode, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAtom } from "jotai";
 import { todoList } from "../state";
 
-export default function HomePage(props: any) {
+type GreetingsProps = {
+  name: string;
+};
+
+const Greetings: React.FC<GreetingsProps> = ({ name }) => (
+  <div>Hello, {name}</div>
+);
+
+export default function HomePage(
+  props: any,
+  context: any
+): React.ReactNode | null {
   const [state, updateState] = useAtom(todoList);
   const input: any = useRef(null);
   // const addItem = async () => {

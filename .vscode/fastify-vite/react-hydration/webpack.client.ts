@@ -5,46 +5,49 @@ import { CleanWebpackPlugin } from "clean-webpack-plugin";
 
 const config: webpack.Configuration = {
   mode: "production",
-  entry: "./src/client/index.ts",
+  entry: {
+    "index.js": "./src/client/index.tsx",
+    "mount.js": "./src/client/mount.ts",
+  },
   target: "web",
   output: {
     path: path.resolve(__dirname, "dist", "client"),
-    filename: "index.js",
+    filename: "[name]",
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js"],
-    modules: [path.resolve(__dirname, "src", "client"), "node_modules"],
+    extensions: ["", ".ts", ".tsx", ".js"],
+    // modules: [path.resolve(__dirname, "src", "client"), "node_modules"],
 
-    alias: {
-      // "./base": path.resolve(__dirname, "src", "client", "base.tsx"),
-      // "./routes": path.resolve(__dirname, "src", "client", "routes.ts"),
-      "@": path.resolve(__dirname, "src", "client"),
-    },
+    // alias: {
+    //   // "./base": path.resolve(__dirname, "src", "client", "base.tsx"),
+    //   // "./routes": path.resolve(__dirname, "src", "client", "routes.ts"),
+    //   "@": path.resolve(__dirname, "src", "client"),
+    // },
   },
   module: {
     rules: [
+      {
+        test: /\.html$/,
+        loader: "file-loader",
+        // options: {
+        //   name: "[name].[ext]",
+        // },
+      },
       {
         test: /\.(ts|tsx)$/,
         exclude: /node_modules/,
         use: "babel-loader",
       },
-      {
-        test: /\.html$/,
-        loader: "html-loader",
-        options: {
-          minimize: true,
-        },
-      },
     ],
   },
   plugins: [
-    new webpack.ProvidePlugin({
-      React: "react",
-    }),
+    // new webpack.ProvidePlugin({
+    //   React: "react",
+    // }),
     new HtmlWebpackPlugin({
       template: "./src/client/index.html",
     }),
-    new CleanWebpackPlugin(),
+    // new CleanWebpackPlugin(),
   ],
 };
 

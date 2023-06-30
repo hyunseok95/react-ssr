@@ -1,9 +1,12 @@
 // import "./base.css";
 import { hydrateRoot } from "react-dom/client";
-import App from "./base";
+// import ReactDOM from "react-dom";
+import { App } from "./index";
 
 declare global {
-  interface Window { hydration: any; }
+  interface Window {
+    hydration: any;
+  }
 }
 
 const htmlElemnet: HTMLElement | null = document.querySelector("main");
@@ -14,8 +17,9 @@ if (!htmlElemnet) {
 const container: Document | Element = htmlElemnet;
 const initialChildren: React.ReactNode = App(window.hydration);
 
-hydrateRoot(
-  container,
-  initialChildren
-);
+hydrateRoot(container, initialChildren);
 
+// ReactDOM.hydrate(
+//   container,
+//   initialChildren
+// )

@@ -3,8 +3,7 @@ import * as webpack from "webpack";
 
 const config: webpack.Configuration = {
   mode: "production",
-  // entry: "./src/server/index.ts",
-  entry: "./src/server/server.ts",
+  entry: "./src/server/index.ts",
   target: "node",
   output: {
     path: path.resolve(__dirname, "dist", "server"),

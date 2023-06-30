@@ -15,7 +15,7 @@
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
     "start": "npm run build:server && node dist/server/index.js",
-    "dev": "babel-node --extensions '.ts,.js' src/server/server.ts",
+    "dev": "babel-node --extensions '.ts,.js' src/server/index.ts",
     "nm": "nodemon",
     "w1": "webpack",
     "watch": "webpack --watch",

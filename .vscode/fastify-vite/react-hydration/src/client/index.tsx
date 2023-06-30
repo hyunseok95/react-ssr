@@ -7,8 +7,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // import "./styles/index.css";
 // import createApp from ".";
-import Index from "./views";
-import Other from "./views/other";
+import { Home } from "./views";
+import { Other } from "./views/other";
 
 // const isProd = process.env.NODE_ENV === "production";
 // const Router = import.meta.env.SSR ? StaticRouter : BrowserRouter
@@ -23,8 +23,8 @@ export function App(ctx: any, url: string | void) {
       {/* <Router location={url!}> */}
       <Router>
         <Routes>
-          <Route key="/" path="/" element={<Index />} />;
-          <Route key="/other" path="/other" element={<Other />} />;
+          <Route key="/" path="/" Component={Home} />;
+          <Route key="/other" path="/other" Component={Other} />;
         </Routes>
       </Router>
     </Suspense>
@@ -38,7 +38,7 @@ export function App(ctx: any, url: string | void) {
 const routes = [
   {
     path: "/",
-    component: Index,
+    component: Home,
   },
   {
     path: "/other",

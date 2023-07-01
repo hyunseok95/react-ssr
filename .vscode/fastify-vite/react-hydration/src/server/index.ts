@@ -10,7 +10,6 @@ class Executor extends EventEmitter {
     super();
     this.on("start", this.start);
     this.on("error", this.error);
-    this.emit("start");
   }
 
   async start(): Promise<void> {
@@ -60,4 +59,5 @@ class Executor extends EventEmitter {
   }
 }
 
-new Executor();
+const executor = new Executor();
+executor.emit("start");

@@ -14,7 +14,8 @@ const devServer: DevServerConfiguration = {
 
 const config: WebpackConfiguration = {
   mode: "production",
-  entry: "./src/client/render.tsx",
+  // entry: "./src/client/render.tsx",
+  entry: "./src/client/hydrate.tsx",
   // entry: {
   // "render.js": "./src/client/render.tsx",
   // "hydrate.js": "./src/client/hydrate.tsx",

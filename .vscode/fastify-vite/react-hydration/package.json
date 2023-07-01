@@ -9,7 +9,7 @@
     "build:client": "webpack --config webpack.client.ts",
     "build:server": "webpack --config webpack.server.ts",
     "start": "npm run build:server && node dist/server/index.js",
-    "dev": "babel-node --extensions '.ts,.js' src/server/index.ts",
+    "dev": "babel-node --extensions '.tsx,.ts,.js' src/server/index.ts",
     "nm": "nodemon",
     "watch": "webpack --watch",
     "serve": "webpack serve --config webpack.client.ts --mode development"

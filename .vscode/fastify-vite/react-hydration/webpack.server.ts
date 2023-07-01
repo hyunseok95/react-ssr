@@ -18,7 +18,7 @@ const config: webpack.Configuration = {
   module: {
     rules: [
       {
-        test: /\.(js|ts)?$/,
+        test: /\.(ts)?$/,
         exclude: /node_modules/,
         use: "babel-loader",
       },

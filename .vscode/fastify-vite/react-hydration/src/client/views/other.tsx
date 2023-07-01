@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 
 interface MyProps {
@@ -8,7 +8,7 @@ interface MyProps {
 export const Other: React.FunctionComponent<MyProps> = function (
   props: MyProps,
   context?: any
-): ReactNode {
+): React.ReactNode {
   return (
     <div>
       <p>This page is just for demonstrating client-side navigation.</p>

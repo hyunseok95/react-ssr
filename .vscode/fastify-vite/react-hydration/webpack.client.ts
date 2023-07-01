@@ -1,23 +1,34 @@
 import * as path from "path";
-import * as webpack from "webpack";
+import type { Configuration as WebpackConfiguration } from "webpack";
+import type { Configuration as DevServerConfiguration } from "webpack-dev-server";
+
 import HtmlWebpackPlugin from "html-webpack-plugin";
+import { HotModuleReplacementPlugin } from "webpack";
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 
-const config: webpack.Configuration = {
+const devServer: DevServerConfiguration = {
+  hot: true,
+  host: "localhost",
+  port: 3001,
+};
+
+const config: WebpackConfiguration = {
   mode: "production",
-  entry: {
-    "index.js": "./src/client/index.tsx",
-    "mount.js": "./src/client/mount.ts",
-  },
+  entry: "./src/client/render.tsx",
+  // entry: {
+  // "render.js": "./src/client/render.tsx",
+  // "hydrate.js": "./src/client/hydrate.tsx",
+  // },
+  devServer: devServer,
   target: "web",
   output: {
     path: path.resolve(__dirname, "dist", "client"),
-    filename: "[name]",
+    filename: "index.js",
+    // filename: "[name]",
   },
   resolve: {
-    extensions: ["", ".ts", ".tsx", ".js"],
+    extensions: [".tsx", ".ts", ".js"],
     // modules: [path.resolve(__dirname, "src", "client"), "node_modules"],
-
     // alias: {
     //   // "./base": path.resolve(__dirname, "src", "client", "base.tsx"),
     //   // "./routes": path.resolve(__dirname, "src", "client", "routes.ts"),
@@ -27,27 +38,28 @@ const config: webpack.Configuration = {
   module: {
     rules: [
       {
-        test: /\.html$/,
-        loader: "file-loader",
-        // options: {
-        //   name: "[name].[ext]",
-        // },
+        test: /\.(ts|tsx)$/,
+        exclude: "/node_modules",
+        use: "babel-loader",
       },
       {
-        test: /\.(ts|tsx)$/,
-        exclude: /node_modules/,
-        use: "babel-loader",
+        test: /\.(html)$/,
+        use: "html-loader",
+      },
+      {
+        test: /\.(png|jp(e*)g|svg|gif)$/,
+        use: "file-loader",
       },
     ],
   },
   plugins: [
-    // new webpack.ProvidePlugin({
-    //   React: "react",
-    // }),
     new HtmlWebpackPlugin({
-      template: "./src/client/index.html",
+      template: path.resolve(__dirname, "src", "client", "index.html"),
+      filename: "index.html",
     }),
-    // new CleanWebpackPlugin(),
+    new HotModuleReplacementPlugin(),
+
+    new CleanWebpackPlugin(),
   ],
 };
 

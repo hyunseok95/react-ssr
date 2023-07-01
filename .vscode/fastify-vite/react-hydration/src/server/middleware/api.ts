@@ -7,6 +7,15 @@ import type {
   FastifyRequest,
 } from "fastify";
 
+export default async function apiRouter<
+  Options extends FastifyPluginOptions = Record<never, never>
+>(fastify: FastifyInstance, opts: Options, done: (err?: Error) => void) {
+  fastify.all("/", requestHandler(defaultReqHandler));
+  fastify.all("/user", requestHandler(userReqHandler));
+  fastify.all("/auth", requestHandler(authReqHandler));
+  done();
+}
+
 function errorHandler(e: Error | unknown): Error {
   if (e instanceof Error) {
     throw new Error(format("error!: %s", e.message));
@@ -25,15 +34,6 @@ function requestHandler(
       errorHandler(e);
     }
   };
-}
-
-export default async function apiRouter<
-  Options extends FastifyPluginOptions = Record<never, never>
->(fastify: FastifyInstance, opts: Options, done: (err?: Error) => void) {
-  fastify.all("/", requestHandler(defaultReqHandler));
-  fastify.all("/user", requestHandler(userReqHandler));
-  fastify.all("/auth", requestHandler(authReqHandler));
-  done();
 }
 
 function defaultReqHandler(req: FastifyRequest, res: FastifyReply): void {

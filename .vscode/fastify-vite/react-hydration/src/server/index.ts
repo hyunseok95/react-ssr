@@ -1,9 +1,11 @@
-import { EventEmitter } from "events";
-import Fastify from "fastify";
-
-import renderer from "./renderer";
-import apiRouter from "./api";
 import * as path from "path";
+import { EventEmitter } from "events";
+
+import Fastify from "fastify";
+import FastifyCors from "@fastify/cors";
+
+import RenderMiddle from "./middleware/render";
+import APIMiddle from "./middleware/api";
 
 class Executor extends EventEmitter {
   constructor() {
@@ -16,28 +18,19 @@ class Executor extends EventEmitter {
     try {
       const host = "0.0.0.0";
       const port = 3000;
-      const dev = process.env.NODE_ENV !== "production";
       const app = Fastify();
 
-      // await app.register(FastifyCors, {
-      //   preflightContinue: true,
-      // });
-
-      await app.register(renderer, {
-        root: path.resolve(__dirname, "..", ".."),
-        dev,
+      await app.register(FastifyCors, {
+        preflightContinue: true,
       });
-      await app.register(apiRouter, {
+
+      await app.register(RenderMiddle, {
+        root: path.resolve(__dirname, "..", ".."),
+      });
+
+      await app.register(APIMiddle, {
         prefix: "/api",
       });
-
-      // if (isProd) {
-      //   await serveProdution(app);
-      // } else {
-      //   await serveDevelopment(app);
-      // }
-
-      // await app.renderer.ready();
 
       await app.ready();
       app.listen({ host, port });

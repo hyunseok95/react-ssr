@@ -10,16 +10,13 @@ const config: webpack.Configuration = {
     filename: "index.js",
   },
   resolve: {
-    extensions: [".ts", ".js"],
-    alias: {
-      "@": path.resolve(__dirname, "src", "server"),
-    },
+    extensions: [".tsx", ".ts", ".js"],
   },
   module: {
     rules: [
       {
-        test: /\.(ts)?$/,
-        exclude: /node_modules/,
+        test: /\.(ts|tsx)$/,
+        exclude: "/node_modules",
         use: "babel-loader",
       },
     ],
